@@ -4,6 +4,7 @@ import world
 class Player:
     def __init__(self):
         self.inventory = [items.Rock(), items.Dagger(), items.CrustyBread()]
+        self.armor = items.LeatherArmor()
         self.x = world.start_tile_location[0]
         self.y = world.start_tile_location[1]
         self.hp = 100
@@ -121,3 +122,33 @@ class Player:
             self.inventory.remove(self.inventory[int(choice)-1])
         except(ValueError, IndexError):
             print("Invalid choice")
+            
+    def loot_corpse(self):
+        room = world.tile_at(self.x, self.y)
+        print("You search the dead {}".format(room.enemy.name))
+        if room.enemy.goldTaken == True:
+            print("You find no gold.")
+        else:
+            print("You find {} gold".format(room.enemy.gold))
+            self.gold += room.enemy.gold
+            room.enemy.goldTaken = True
+        if room.enemy.possessions == []:
+            print("...and nothing")
+        else:
+            print("After more searching you find:")
+            for i, item in enumerate(room.enemy.possessions, 1):
+                print("{} - {}".format(i, item))
+            try:
+                choice = raw_input("Take it (a)ll or select the number to take: ")
+                if choice in ['a','A']:
+                    self.inventory.extend(room.enemy.possessions)
+                    print("You picked up: ")
+                    print(", ".join([str(x)for x in room.enemy.possessions]))
+                    room.enemy.possessions = []
+                else:
+                    self.inventory.append(room.enemy.possessions[int(choice)-1])
+                    print("You picked up {}.".format(room.enemy.possessions[int(choice)-1]))
+                    room.enemy.possessions.remove(room.enemy.possessions[int(choice)-1])
+            except(ValueError, IndexError):
+                print("Invalid choice")
+        

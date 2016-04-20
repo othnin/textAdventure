@@ -26,6 +26,9 @@ def get_available_actions(room, player):
         action_adder(actions, 'g', player.get_item, "Get item(s) in room")
     if isinstance(room, world.TraderTile):
         action_adder(actions, 't',player.trade, "Trade")
+    if isinstance(room, world.EnemyTile) and not room.enemy.is_alive():
+        action_adder(actions, 'l', player.loot_corpse, "Loot corpse")
+    
     if isinstance(room, world.EnemyTile) and room.enemy.is_alive():
         action_adder(actions, 'a', player.attack, "Attack")
     else:
@@ -65,7 +68,7 @@ def play():
         if player.is_alive() and not player.victory:
             choose_action(room, player)
         elif not player.is_alive():
-            print("Your journey has come to an earyl end!")
+            print("Your journey has come to an early end!")
 
 if __name__ == "__main__":
     play()

@@ -46,9 +46,8 @@ class FindGoldTile(MapTile):
         self.gold = random.randint(1, 50)
         self.gold_claimed = False
         super(FindGoldTile, self).__init__(x,y)
-        self.ground.append(items.CrustyBread())
-        self.ground.append(items.Statue())
-        self.ground.append(items.RustySword())
+        self.ground = [items.CrustyBread(), items.Statue()]
+      
 
     
     def intro_text(self):
@@ -98,8 +97,18 @@ class EnemyTile(MapTile):
             
     def modify_player(self, player):
         if self.enemy.is_alive():
-            player.hp = player.hp - self.enemy.damage
-            print("Enemy does {} damage. You have {} HP remaining.".format(self.enemy.damage, player.hp))
+            if player.armor == []:
+                player.hp = player.hp - self.enemy.damage
+                print("Enemy does {} damage. You have {} HP remaining.".format(self.enemy.damage, player.hp))
+            else:
+                #damageToPlayer = self.enemy.damage - player.armor.ac if player.armor.ac <  self.enemy.damage else damageToPlayer = 0
+                if player.armor.ac <  self.enemy.damage:
+                    damageToPlayer = self.enemy.damage - player.armor.ac
+                else:
+                    damageToPlayer = 1
+                player.hp = player.hp - damageToPlayer
+                print("Enemy does {} damage. You have {} HP remaining.".format(damageToPlayer, player.hp))
+            
             
 class TraderTile(MapTile):
 
@@ -161,7 +170,7 @@ world_dsl = """
 |EN|EN|VT|EN|EN|
 |EN|  |  |  |EN|
 |EN|FG|BT|  |TT|
-|TT|  |ST|FG|BT|
+|TT|  |ST|EN|BT|
 |FG|  |EN|  |FG|
 """         
                    

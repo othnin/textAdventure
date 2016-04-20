@@ -2,7 +2,7 @@ import items
 
 class NonPlayableCharacter(object):
     def __init__(self):
-        raise NotImplementedError("Do not create raw NPS objects.")
+        raise NotImplementedError("Do not create raw NPC objects.")
     
     def __str__(self):
         return self.name
