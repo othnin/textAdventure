@@ -1,4 +1,4 @@
-import enemies, npc
+import enemies, npc, items
 import random
 
 class MapTile(object):
@@ -6,6 +6,7 @@ class MapTile(object):
     def __init__(self, x,y):
         self.x = x
         self.y = y
+        self.ground = []
         
     def intro_text(self):
         raise NotImplementedError("Do not call directly. Implement a subclass")
@@ -45,18 +46,22 @@ class FindGoldTile(MapTile):
         self.gold = random.randint(1, 50)
         self.gold_claimed = False
         super(FindGoldTile, self).__init__(x,y)
-        
+        self.ground.append(items.CrustyBread())
+        self.ground.append(items.Statue())
+        self.ground.append(items.RustySword())
+
     
     def intro_text(self):
         if self.gold_claimed:
-            return """
-            Another unremarkable part of the cave. You must forge onwards.
-            """
+            room_text = "Another unremarkable part of the cave. You must forge onwards."
         else:
-            return """
-            Someone has dropped some gold. You pick it up
-            """
-        
+            room_text = "Someone has dropped some gold. You pick it up"
+        if len(self.ground) > 0:
+            room_text += "\nAlso of interest in the room:\n"
+            for item in self.ground:
+                room_text += '* ' + item.name  + "\n"
+            #    room_text += item.Name  str(item)
+        return room_text
     
     def modify_player(self, player):
         if not self.gold_claimed:
@@ -126,6 +131,7 @@ class TraderTile(MapTile):
         if item.value > buyer.gold:
             print("Thats too expensive")
             return
+        print(item)
         seller.inventory.remove(item)
         buyer.inventory.append(item)
         seller.gold = seller.gold + item.value
@@ -134,8 +140,6 @@ class TraderTile(MapTile):
             
     def trade(self, buyer, seller):
         for i, item in enumerate(seller.inventory, 1):
-            if not hasattr(item, 'value'):
-                continue
             print("{}. {} - {} Gold".format(i, item.name, item.value))
         while True:
             user_input = raw_input("Choose an item or press Q to exit: ")
@@ -157,7 +161,7 @@ world_dsl = """
 |EN|EN|VT|EN|EN|
 |EN|  |  |  |EN|
 |EN|FG|BT|  |TT|
-|TT|  |ST|BT|BT|
+|TT|  |ST|FG|BT|
 |FG|  |EN|  |FG|
 """         
                    

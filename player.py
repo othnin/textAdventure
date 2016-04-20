@@ -3,7 +3,7 @@ import world
 
 class Player:
     def __init__(self):
-        self.inventory = [items.Rock(), items.Dagger(), 'Gold(5)', items.CrustyBread()]
+        self.inventory = [items.Rock(), items.Dagger(), items.CrustyBread()]
         self.x = world.start_tile_location[0]
         self.y = world.start_tile_location[1]
         self.hp = 100
@@ -11,7 +11,7 @@ class Player:
         self.victory = False
         
     def print_inventory(self):
-        print("Invetory: ")
+        print("Inventory: ")
         for item in self.inventory:
             print('* ' + str(item))
         print("Gold: {}".format(self.gold))
@@ -88,5 +88,36 @@ class Player:
             except(ValueError, IndexError):
                 print("Invalid choice. Try again")
                 
-
+    def get_item(self):
+        room = world.tile_at(self.x, self.y)        
+        getable_items = [item for item in room.ground if item.takeable == True]
+        for i, item in enumerate(getable_items, 1):
+            print("{} - {}".format(i, item))        
+        choice = raw_input("Select item to pick up: ")
+        try:
+            self.inventory.append(getable_items[int(choice)-1])
+            print("You picked up: {}".format(getable_items[int(choice)-1]))
+            room.ground.remove(getable_items[int(choice)-1])
+        except(ValueError, IndexError):
+            print("Invalid choice")
                 
+            
+#            itemChosen = getable_items[int(choice)-1]
+#            self.inventory.append(itemChosen)
+#            room.ground.remove(itemChosen) 
+#            print("You picked up: {}".format(itemChosen))
+#        except(ValueError, IndexError):
+#            print("Invalid Choice")
+            
+    def drop_item(self):
+        room = world.tile_at(self.x, self.y)
+        for i, item in enumerate(self.inventory, 1):
+            print("{} - {}".format(i, item))
+            
+        choice = raw_input("Select item to drop: ")
+        try:
+            room.ground.append(self.inventory[int(choice)-1])
+            print("You dropped: {}".format(self.inventory[int(choice)-1]))
+            self.inventory.remove(self.inventory[int(choice)-1])
+        except(ValueError, IndexError):
+            print("Invalid choice")

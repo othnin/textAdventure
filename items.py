@@ -17,6 +17,7 @@ class Rock(Weapon):
         self.description = "A fist sized rock suitable for bludgeoning."
         self.damage = 5
         self.value = 1
+        self.takeable = True
     
     
 class Dagger(Weapon):
@@ -25,6 +26,7 @@ class Dagger(Weapon):
         self.description = "A small dagger with some rust. Somewhat more dangerous that a rock."
         self.damage = 10
         self.value = 20
+        self.takeable = True
 
     
 class RustySword(Weapon):
@@ -33,6 +35,7 @@ class RustySword(Weapon):
         self.description = "This sword is showing its age, but still has some fight left in it."
         self.damage = 20
         self.value = 100
+        self.takeable = True
 
 class Consumable(object):
     def __init__(self):
@@ -46,10 +49,17 @@ class CrustyBread(Consumable):
         self.name = "Crusty Bread"
         self.healing_value = 10
         self.value = 12
+        self.takeable = True
         
 class HealingPotion(Consumable):
     def __init__(self):
         self.name = "Healing Potion"
         self.healing_value = 50
         self.value = 60
+        self.takeable = True
         
+        
+class Statue(object):
+    def __init__(self):
+        self.name = "A large statue"
+        self.takeable = False
