@@ -1,8 +1,8 @@
 from player import Player
 import world
 from collections import OrderedDict  
-    
-    
+
+        
 def room_items_takeable(room):
     if len(room.ground) > 0:
         for item in enumerate(room.ground):
@@ -19,19 +19,21 @@ def action_adder(actions_dict, hotkey, action, name):
 def get_available_actions(room, player):
     actions = OrderedDict()
     print("Choose an action: ")
-    if player.inventory:
-        action_adder(actions, 'i', player.print_inventory, "Print Inventory")
-        action_adder(actions, 'd',player.drop_item, "Drop item from Inventory")
-    if room_items_takeable(room):
-        action_adder(actions, 'g', player.get_item, "Get item(s) in room")
-    if isinstance(room, world.TraderTile):
-        action_adder(actions, 't',player.trade, "Trade")
-    if isinstance(room, world.EnemyTile) and not room.enemy.is_alive():
-        action_adder(actions, 'l', player.loot_corpse, "Loot corpse")
-    
-    if isinstance(room, world.EnemyTile) and room.enemy.is_alive():
+    action_adder(actions, '?', player.status, "Player Status")
+    enemy_alive = any(bad_guy.is_alive() for bad_guy in room.enemy_que)
+    if not room.enemy_que == [] and enemy_alive:
         action_adder(actions, 'a', player.attack, "Attack")
+        action_adder(actions, 'f', player.flee, "Flee (run-away!)")
     else:
+        if not room.enemy_que == [] and not enemy_alive:
+            action_adder(actions, 'l', player.loot_corpse, "Loot corpse")
+        if player.inventory:
+            action_adder(actions, 'i', player.print_inventory, "Print Inventory")
+            action_adder(actions, 'd',player.drop_item, "Drop item from Inventory")
+        if room_items_takeable(room):
+            action_adder(actions, 'g', player.get_item, "Get item(s) in room")
+        if isinstance(room, world.TraderTile):
+            action_adder(actions, 't',player.trade, "Trade")
         if world.tile_at(room.x, room.y-1):
             action_adder(actions, 'n', player.move_north, "Go North")
         if world.tile_at(room.x, room.y+1):
@@ -64,6 +66,9 @@ def play():
     while player.is_alive() and not player.victory:
         room = world.tile_at(player.x, player.y)
         print(room.intro_text())
+        if  not room.enemy_que == []:
+            for bad_guy in room.enemy_que:
+                bad_guy.modify_player(player)
         room.modify_player(player)
         if player.is_alive() and not player.victory:
             choose_action(room, player)

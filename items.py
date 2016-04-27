@@ -36,6 +36,15 @@ class RustySword(Weapon):
         self.damage = 20
         self.value = 100
         self.takeable = True
+        
+class VorpalSword(Weapon):
+    def __init__(self):
+        self.name = "Vorpal Sword"
+        self.description = "Long, lean and deadly. The words snicker-snack are etched in the blade"
+        self.damage = 50
+        self.value = 500
+        self.takeable = True
+        
 ######################################################################################################
 class Consumable(object):
     def __init__(self):
@@ -92,4 +101,5 @@ class LeatherArmor(Armor):
 class Statue(object):
     def __init__(self):
         self.name = "A large statue"
+        self.description  = "A statue of one of the old gods. With 2 heads and arms of feathers, leather and man."
         self.takeable = False

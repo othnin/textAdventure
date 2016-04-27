@@ -1,9 +1,12 @@
-import items
-import world
+from __future__ import division
+import items, world
+from movement import Movement
+import random
 
-class Player:
+
+class Player(Movement):
     def __init__(self):
-        self.inventory = [items.Rock(), items.Dagger(), items.CrustyBread()]
+        self.inventory = [items.Rock(), items.VorpalSword(), items.CrustyBread()]
         self.armor = items.LeatherArmor()
         self.x = world.start_tile_location[0]
         self.y = world.start_tile_location[1]
@@ -16,6 +19,11 @@ class Player:
         for item in self.inventory:
             print('* ' + str(item))
         print("Gold: {}".format(self.gold))
+     
+    def status(self):
+        print("HP: {}".format(self.hp))
+        print("Best Weapon: {}".format(self.most_powerful_weapon()))
+        print("Armor: {}, AC: {}".format(self.armor.name, self.armor.ac))
         
     def trade(self):
         room = world.tile_at(self.x, self.y)
@@ -39,30 +47,42 @@ class Player:
     def attack(self):
         best_weapon = self.most_powerful_weapon()
         room = world.tile_at(self.x, self.y)
-        enemy = room.enemy
-        print("You used {} againt {}!".format(best_weapon, enemy.name))
-        enemy.hp -= best_weapon.damage
-        if not enemy.is_alive():
-            print("You kill {}!".format(enemy.name))
-        else:
-            print("{} HP is {}. ".format(enemy.name, enemy.hp))
-        
-    def move(self,dx, dy):
-        self.x += dx
-        self.y += dy
-        
-    def move_north(self):
-        self.move(dx=0, dy=-1) 
-        
-    def move_south(self):
-        self.move(dx=0, dy=1)
-        
-    def move_east(self):
-        self.move(dx=1, dy=0)
-        
-    def move_west(self):
-        self.move(dx=-1, dy=0)
-        
+        for bad_guy in room.enemy_que:
+            if bad_guy.is_alive():
+                print("You used {} againt {}!".format(best_weapon, bad_guy.name))
+                bad_guy.hp -= best_weapon.damage
+                if not bad_guy.is_alive():
+                    print("You kill {}!".format(bad_guy.name))
+                else:
+                    print("{} HP is {}. ".format(bad_guy.name, bad_guy.hp))
+                break
+    
+    def flee(self):
+        flee_choices = []
+        room = world.tile_at(self.x, self.y)
+        if world.tile_at(room.x, room.y-1):
+            flee_choices.append("move_north")
+        if world.tile_at(room.x, room.y+1):
+            flee_choices.append("move_south")
+        if world.tile_at(room.x+1, room.y): 
+            flee_choices.append("move_east")
+        if world.tile_at(room.x-1, room.y):
+            flee_choices.append("move_west")
+        percent_chance = 1/len(flee_choices)
+        r = random.random()
+        for x in range (len(flee_choices)):
+            if r < percent_chance:
+                flee_direction =  flee_choices[x]
+                break
+            else:
+                percent_chance += percent_chance 
+        fleeNow = getattr(self, flee_direction)
+        print("You fled the monster heading {}!".format(flee_direction[5:]))
+        for bad_guy in room.enemy_que:
+            bad_guy.pursue_player(flee_direction)
+        fleeNow()
+       
+
     def heal(self):
         consumables = [item for item in self.inventory if isinstance(item, items.Consumable)]
         if not consumables:
@@ -103,18 +123,10 @@ class Player:
             print("Invalid choice")
                 
             
-#            itemChosen = getable_items[int(choice)-1]
-#            self.inventory.append(itemChosen)
-#            room.ground.remove(itemChosen) 
-#            print("You picked up: {}".format(itemChosen))
-#        except(ValueError, IndexError):
-#            print("Invalid Choice")
-            
     def drop_item(self):
         room = world.tile_at(self.x, self.y)
         for i, item in enumerate(self.inventory, 1):
-            print("{} - {}".format(i, item))
-            
+            print("{} - {}".format(i, item))            
         choice = raw_input("Select item to drop: ")
         try:
             room.ground.append(self.inventory[int(choice)-1])
@@ -126,29 +138,31 @@ class Player:
     def loot_corpse(self):
         room = world.tile_at(self.x, self.y)
         print("You search the dead {}".format(room.enemy.name))
-        if room.enemy.goldTaken == True:
-            print("You find no gold.")
-        else:
-            print("You find {} gold".format(room.enemy.gold))
-            self.gold += room.enemy.gold
-            room.enemy.goldTaken = True
-        if room.enemy.possessions == []:
-            print("...and nothing")
-        else:
-            print("After more searching you find:")
-            for i, item in enumerate(room.enemy.possessions, 1):
-                print("{} - {}".format(i, item))
-            try:
-                choice = raw_input("Take it (a)ll or select the number to take: ")
-                if choice in ['a','A']:
-                    self.inventory.extend(room.enemy.possessions)
-                    print("You picked up: ")
-                    print(", ".join([str(x)for x in room.enemy.possessions]))
-                    room.enemy.possessions = []
-                else:
-                    self.inventory.append(room.enemy.possessions[int(choice)-1])
-                    print("You picked up {}.".format(room.enemy.possessions[int(choice)-1]))
-                    room.enemy.possessions.remove(room.enemy.possessions[int(choice)-1])
-            except(ValueError, IndexError):
-                print("Invalid choice")
+        for bad_guy in room.enemy_que:
+            if bad_guy.gold > 0:
+                print("You find {} gold on the dead {}".format(bad_guy.gold, bad_guy.name))
+                self.gold += bad_guy.gold
+                bad_guy.gold = 0            
+                
+        for bad_guy in room.enemy_que:
+            if bad_guy.possessions == []:
+                print("...and find nothing on the {}".format(bad_guy.name))
+            else:
+                print("After more searching you find on the {}:".format(bad_guy.name))
+                
+                for i, item in enumerate(bad_guy.possessions, 1):
+                    print("{} - {}".format(i, item))
+                try:
+                    choice = raw_input("Take it (a)ll or select the number to take: ")
+                    if choice in ['a','A']:
+                        self.inventory.extend(bad_guy.possessions)
+                        print("You picked up: ")
+                        print(", ".join([str(x)for x in bad_guy.possessions]))
+                        bad_guy.possessions = []
+                    else:
+                        self.inventory.append(bad_guy.possessions[int(choice)-1])
+                        print("You picked up {}.".format(bad_guy.possessions[int(choice)-1]))
+                        bad_guy.possessions.remove(bad_guy.possessions[int(choice)-1])
+                except(ValueError, IndexError):
+                    print("Invalid choice")
         

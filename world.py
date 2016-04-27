@@ -3,41 +3,68 @@ import random
 
 class MapTile(object):
     
-    def __init__(self, x,y):
+    def __init__(self, x,y, enemy=None):
         self.x = x
         self.y = y
         self.ground = []
+        self.enemy_que = []
+    #    self.enemy = []
+        if not enemy == None:
+            self.enemy_que.append(enemy)
+     #       self.enemy = enemy
+
+            
+        
+            
         
     def intro_text(self):
         raise NotImplementedError("Do not call directly. Implement a subclass")
     
     def modify_player(self, player):
-        pass
+        pass  
+    
+    def enemy_text(self):
+        text = ""
+        if len(self.enemy_que) > 0:
+            for bad_guy in self.enemy_que:
+                text += bad_guy.alive_text if bad_guy.is_alive() else bad_guy.dead_text
+        return text
     
 class StartTile(MapTile):
-        
+    def __init__(self, x, y):
+        super(StartTile, self).__init__(x, y)
+            
     def intro_text(self):
-        return """
+        text =  """
         You find yourself in a cave with flickering torch on the wall.
-        You can make out four paths, each equally dark and forboding
+        You can make out four paths, each equally dark and forboding\n
         """
+        return text + self.enemy_text()
             
 class BoringTile(MapTile):
+    def __init__(self, x, y):
+        super(BoringTile, self).__init__(x, y,)
    
     def intro_text(self):
-        return """
-        This is a very boring part of the cave
+        text =  """
+        This is a very boring part of the cave\n
         """
+        return text + self.enemy_text()
+        
         
 class VictoryTile(MapTile):
-       
+    def __init__(self, x, y):
+        super(VictoryTile, self).__init__(x, y)
+            
     def intro_text(self):
-        return """
+        text = """
         You see a bright light in the distanc...
         It grows as you get closer! It's the sunlight!
         
-        Victory is yours!
+        Victory is yours!\n
         """
+        return text + self.enemy_text()
+    
     def modify_player(self, player):
         player.victory = True
         
@@ -59,7 +86,6 @@ class FindGoldTile(MapTile):
             room_text += "\nAlso of interest in the room:\n"
             for item in self.ground:
                 room_text += '* ' + item.name  + "\n"
-            #    room_text += item.Name  str(item)
         return room_text
     
     def modify_player(self, player):
@@ -68,46 +94,37 @@ class FindGoldTile(MapTile):
             player.gold = player.gold + self.gold
             print("+{} gold added".format(self.gold))
             
-    
+
+
+class TigerDenTile(MapTile):
+    def __init__(self,x,y):
+        #self.enemy = enemies.Tiger(x,y)
+        super(TigerDenTile, self).__init__(x,y, enemies.Tiger(x,y))
+        
+    def intro_text(self):
+        text = "A 10 by 25 foot cell with bones of dead animals and a large hole on the far wall. This looks an animal den of some kind.\n"
+        return text + self.enemy_text()
+
+
 class EnemyTile(MapTile):
     
-    def __init__(self, x, y):
+    def __init__(self, x, y): 
+        
         r = random.random()
         if r < 0.50:
-            self.enemy = enemies.GiantSpider()
-            self.alive_text = "A giant spider jumps down from it's web in front of you!"
-            self.dead_text = "The corpse of a giant spider rots on the ground"
-        if r < 0.80:
-            self.enemy = enemies.Ogre()
-            self.alive_text = "An orge is blocking your path!"
-            self.dead_text = "A dead ogre reminds you of your triumpg"
-        if r < 0.95:
-            self.enemy = enemies.BatColony()
-            self.alive_text = "You hear a squeaking noise growing louder ...suddenly you are lost in a swarm of bats!"
-            self.dead_text = "Dozens of dead bats are scattered on the ground"
+            self.enemy = enemies.GiantSpider(x,y)
+        elif r < 0.80:
+            self.enemy = enemies.Ogre(x,y)
+        elif r < 0.95:
+            self.enemy = enemies.BatColony(x,y)
         else:
-            self.enemy = enemies.RockMonster()       
-            self.alive_text = "You've distured a rock monster from his slumber!"
-            self.dead_text = "Defeated, the monster has reverted into an ordinary rock"
-        super(EnemyTile, self).__init__(x, y)
+            self.enemy = enemies.RockMonster(x,y)       
+        super(EnemyTile, self).__init__(x, y, self.enemy)
 
     def intro_text(self):
-        text = self.alive_text if self.enemy.is_alive() else self.dead_text
-        return text
+        text = "This is a generic monster tile.\n"
+        return text + self.enemy_text()
             
-    def modify_player(self, player):
-        if self.enemy.is_alive():
-            if player.armor == []:
-                player.hp = player.hp - self.enemy.damage
-                print("Enemy does {} damage. You have {} HP remaining.".format(self.enemy.damage, player.hp))
-            else:
-                #damageToPlayer = self.enemy.damage - player.armor.ac if player.armor.ac <  self.enemy.damage else damageToPlayer = 0
-                if player.armor.ac <  self.enemy.damage:
-                    damageToPlayer = self.enemy.damage - player.armor.ac
-                else:
-                    damageToPlayer = 1
-                player.hp = player.hp - damageToPlayer
-                print("Enemy does {} damage. You have {} HP remaining.".format(damageToPlayer, player.hp))
             
             
 class TraderTile(MapTile):
@@ -169,8 +186,8 @@ class TraderTile(MapTile):
 world_dsl = """
 |EN|EN|VT|EN|EN|
 |EN|  |  |  |EN|
-|EN|FG|BT|  |TT|
-|TT|  |ST|EN|BT|
+|EN|FG|EN|  |TT|
+|TT|  |ST|TD|EN|
 |FG|  |EN|  |FG|
 """         
                    
@@ -182,6 +199,7 @@ tile_type_dict = {"VT": VictoryTile,
                   "FG": FindGoldTile,
                   "TT": TraderTile,
                   "BT": BoringTile,
+                  "TD": TigerDenTile,
                   "  ":None}
 
 def is_dsl_valid(dsl):
