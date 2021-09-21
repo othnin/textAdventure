@@ -1,4 +1,4 @@
-from __builtin__ import NotImplementedError
+from builtins import NotImplementedError
 
 
 #############################################################################
