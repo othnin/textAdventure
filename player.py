@@ -3,7 +3,9 @@ import items, world
 from movement import Movement
 import random
 
-
+'''
+User player class
+'''
 class Player(Movement):
     def __init__(self):
         self.inventory = [items.Rock(), items.VorpalSword(), items.CrustyBread()]
