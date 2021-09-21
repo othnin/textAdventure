@@ -141,7 +141,7 @@ class TraderTile(MapTile):
     def check_if_trade(self, player): 
         while True:
             print("Would you like to (B)uy (S)ell or (Q)uit: ")
-            user_input = raw_input()
+            user_input = input()
             if user_input in ['q', 'Q']:
                 return
             elif user_input in ['B','b']:
@@ -168,7 +168,7 @@ class TraderTile(MapTile):
         for i, item in enumerate(seller.inventory, 1):
             print("{}. {} - {} Gold".format(i, item.name, item.value))
         while True:
-            user_input = raw_input("Choose an item or press Q to exit: ")
+            user_input = input("Choose an item or press Q to exit: ")
             if user_input in ['q', 'Q']:
                 return
             else:
