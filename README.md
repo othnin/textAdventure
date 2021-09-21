@@ -7,4 +7,4 @@ rev 1.01 - Added ground que to the rooms so a user can drop and pick up items.
 # textAdventure
  To run: python game.py
  
- Ported to python 2.7
+
