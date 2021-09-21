@@ -54,7 +54,7 @@ def choose_action(room, player):
     action = None
     while not action:
         available_actions = get_available_actions(room, player)
-        action_input = raw_input("Action:" )
+        action_input = input("Action:" )
         action = available_actions.get(action_input)
         if action:
             action()
