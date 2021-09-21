@@ -116,7 +116,7 @@ class Player(Movement):
         getable_items = [item for item in room.ground if item.takeable == True]
         for i, item in enumerate(getable_items, 1):
             print("{} - {}".format(i, item))        
-        choice = raw_input("Select item to pick up: ")
+        choice = input("Select item to pick up: ")
         try:
             self.inventory.append(getable_items[int(choice)-1])
             print("You picked up: {}".format(getable_items[int(choice)-1]))
@@ -129,7 +129,7 @@ class Player(Movement):
         room = world.tile_at(self.x, self.y)
         for i, item in enumerate(self.inventory, 1):
             print("{} - {}".format(i, item))            
-        choice = raw_input("Select item to drop: ")
+        choice = input("Select item to drop: ")
         try:
             room.ground.append(self.inventory[int(choice)-1])
             print("You dropped: {}".format(self.inventory[int(choice)-1]))
@@ -155,7 +155,7 @@ class Player(Movement):
                 for i, item in enumerate(bad_guy.possessions, 1):
                     print("{} - {}".format(i, item))
                 try:
-                    choice = raw_input("Take it (a)ll or select the number to take: ")
+                    choice = input("Take it (a)ll or select the number to take: ")
                     if choice in ['a','A']:
                         self.inventory.extend(bad_guy.possessions)
                         print("You picked up: ")
