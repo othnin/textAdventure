@@ -2,6 +2,9 @@ from player import Player
 import world
 from collections import OrderedDict  
 
+'''
+Script to start the game
+'''
         
 def room_items_takeable(room):
     if len(room.ground) > 0:
