@@ -5,6 +5,6 @@ rev 1.02 - Added looting from corpses and added armor to the PC
 rev 1.01 - Added ground que to the rooms so a user can drop and pick up items.
 
 # textAdventure
- For an in-depth tutorial, please see [How to Write a Text Adventure in Python](http://letstalkdata.com/2014/08/how-to-write-a-text-adventure-in-python/).
+ To run: python game.py
  
  Ported to python 2.7
